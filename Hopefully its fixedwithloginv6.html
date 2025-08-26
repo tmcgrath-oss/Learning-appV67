@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tristan's Education — CS Course</title>
+<style>
+  :root{
+    --bg:#ffffff;--text:#0f172a;--muted:#64748b;--card:#f1f5f9;--primary:#2563eb;--border:#cbd5e1;--ok:#16a34a;--warn:#ef4444
+  }
+  [data-theme="dark"]{
+    --bg:#0b1020;--text:#e5e7eb;--muted:#94a3b8;--card:#0f172a;--primary:#60a5fa;--border:#334155;--ok:#34d399;--warn:#f87171
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:1rem}
+  .theme-switch button{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:10px;padding:.4rem .6rem;cursor:pointer;margin-left:.25rem}
+  .wrap{max-width:1100px;margin:0 auto;padding:1rem}
+  .center{min-height:65vh;display:flex;align-items:center;justify-content:center}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1.25rem}
+  .auth{width:min(520px,96vw)}
+  .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  label{font-size:.95rem}
+  input[type="text"],input[type="password"]{width:100%;padding:.7rem .8rem;border-radius:10px;border:1px solid var(--border);background:#fff;color:#111}
+  [data-theme="dark"] input[type="text"],[data-theme="dark"] input[type="password"]{background:#0b1020;color:#e5e7eb}
+  .btn{padding:.7rem 1rem;border:0;border-radius:10px;background:var(--primary);color:#fff;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn.secondary{background:#64748b}
+  .muted{color:var(--muted)}
+  .error{background:rgba(239,68,68,.12);border:1px solid var(--warn);color:var(--warn);padding:.6rem .75rem;border-radius:10px;margin:.5rem 0;display:none}
+  .success{background:rgba(22,163,74,.12);border:1px solid var(--ok);color:var(--ok);padding:.6rem .75rem;border-radius:10px;margin:.5rem 0;display:none}
+  .units{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+  .unitCard h3{margin:.4rem 0}
+  .progress{height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden}
+  .progress>div{height:100%;width:0;background:var(--primary);transition:width .3s}
+  .assignments button{margin-top:.6rem}
+  .passed{background:rgba(22,163,74,.12)!important;color:var(--ok)!important;border-color:var(--ok)!important}
+  .hidden{display:none!important}
+  footer{text-align:center;padding:1rem;border-top:1px solid var(--border);margin-top:1rem}
+  .lesson p{margin:.5rem 0}
+  .quiz-item{margin:.75rem 0}
+</style>
+</head>
+<body data-theme="auto">
+<header>
+  <h1>Tristan's Education — Computer Science (Self-Paced)</h1>
+  <div class="theme-switch">
+    <button onclick="setTheme('light')">☀️ Light</button>
+    <button onclick="setTheme('dark')">🌙 Dark</button>
+    <button onclick="setTheme('auto')">🖥️ System</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- AUTH / WELCOME -->
+  <section class="center" id="welcomeSection">
+    <div class="card auth">
+      <h2 style="margin:.25rem 0 0 0">Welcome 👋</h2>
+      <p class="muted" style="margin:.25rem 0 1rem 0">
+        Log in or create an account to start. (don't worry, its secured)
+      </p>
+
+      <div id="alertError" class="error"></div>
+      <div id="alertOk" class="success"></div>
+
+      <div class="row" style="gap:1rem">
+        <div style="flex:1">
+          <label>Username</label>
+          <input id="authUser" type="text" placeholder="e.g. student1"/>
+        </div>
+        <div style="flex:1">
+          <label>Password</label>
+          <input id="authPass" type="password" placeholder="••••••"/>
+        </div>
+      </div>
+
+      <div class="row" style="gap:.5rem;margin-top:.5rem">
+        <div style="flex:1">
+          <label>Display name (optional)</label>
+          <input id="displayName" type="text" placeholder="e.g. Alex Johnson"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:.75rem">
+        <button class="btn" id="btnLogin">Login</button>
+        <button class="btn secondary" id="btnSignup">Sign up</button>
+        <button class="btn ghost" id="btnViewUnits">View Units</button>
+      </div>
+
+      <p class="muted" style="margin:.75rem 0 0 0;font-size:.9rem">
+        Tip: “View Units” requires you to be logged in (so progress can be saved).
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <main id="courseSection" class="hidden">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <strong id="greeter">Hello!</strong>
+          <span class="muted"> — your progress is saved to Google Sheets.</span>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="btnLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="units" id="unitGrid"></div>
+  </main>
+</div>
+
+<footer>© 2025 Tristan's Education, A division of EDTco. All Rights Reserved.</footer>
+
+<script>
+/* ====== CONFIG ====== */
+const APP_URL = "https://script.google.com/macros/s/AKfycbwh-sLwp5ZPtC4sh0-Nulz0hnaYSXzL6CYKURYWzSPFyhA_sRlCaQzoW0K7-GrXLIOGjw/exec";
+const PASS_THRESHOLD = 0.67;
+
+/* ====== THEME ====== */
+function setTheme(mode){
+  if(mode==="auto"){
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.body.setAttribute("data-theme", prefersDark?"dark":"light");
+  }else document.body.setAttribute("data-theme", mode);
+  localStorage.setItem("theme_pref", mode);
+}
+
+/* ====== HELPERS ====== */
+const $ = sel => document.querySelector(sel);
+function show(el){ el.classList.remove("hidden"); }
+function hide(el){ el.classList.add("hidden"); }
+function safeJSON(txt){ try{return JSON.parse(txt);}catch{return null;} }
+function shuffle(a){ const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
+function q(qtxt, options, answer){ return {q:qtxt, options, answer}; }
+function ensureValid(quiz){ return (quiz||[]).filter(x=>x&&x.q&&Array.isArray(x.options)&&x.options.length>=2&&typeof x.answer==="string"); }
+function banner(ok,msg){ const eOk=$("#alertOk"), eEr=$("#alertError"); eOk.style.display="none"; eEr.style.display="none"; if(ok){ eOk.textContent=msg; eOk.style.display="block"; } else { eEr.textContent=msg; eEr.style.display="block"; } }
+
+/* ====== BACKEND (use text/plain to bypass preflight) ====== */
+async function callBackend(action, payload){
+  try{
+    const res = await fetch(APP_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({action, ...payload})
+    });
+    const text = await res.text();
+    const json = safeJSON(text) || {};
+    return json;
+  }catch(e){
+    console.error("API error", e);
+    return {success:false,message:"Network error"};
+  }
+}
+const apiSignup = (username,password)=>callBackend("signup",{username,password});
+const apiLogin  = (username,password)=>callBackend("login",{username,password});
+const apiSave   = (username,progress)=>callBackend("saveProgress",{username,progress: JSON.stringify(progress)});
+
+/* ====== CURRICULUM (Units 1–9 content + quizzes; Unit 10 = Final Exam) ====== */
+const units = [
+  // 1
+  {
+    title:"Unit 1 — Computer Fundamentals",
+    lesson:[
+      "A computer processes data using hardware (physical parts) and software (programs).",
+      "CPU executes instructions; RAM holds working data; storage (SSD/HDD) persists data when powered off.",
+      "I/O devices include keyboard/mouse (input) and monitor/printer (output).",
+      "Data is represented as bits (0/1). Bytes = 8 bits. Larger units: KB, MB, GB, TB."
+    ],
+    quiz: ensureValid([
+      q("Which component executes program instructions?",["GPU","CPU","RAM","SSD"],"CPU"),
+      q("Which holds data only while powered?",["RAM","SSD","HDD","Optical disc"],"RAM"),
+      q("Keyboard is an example of…",["Output device","Input device","Storage","Network"],"Input device"),
+      q("A byte is…",["4 bits","8 bits","16 bits","32 bits"],"8 bits"),
+      q("Persistent storage example:",["Cache","Registers","RAM","SSD"],"SSD"),
+      q("Which primarily renders graphics?",["GPU","PSU","NIC","Southbridge"],"GPU"),
+      q("Binary uses digits…",["0–9","0/1","0–7","A–F"],"0/1"),
+      q("Which is software?",["Motherboard","Operating System","Power supply","Heatsink"],"Operating System")
+    ])
+  },
+  // 2
+  {
+    title:"Unit 2 — Operating Systems & Files",
+    lesson:[
+      "An operating system manages hardware resources and provides services for applications.",
+      "Common OS: Windows, macOS, Linux; mobile: Android, iOS.",
+      "Files store data; directories (folders) organize files. File extensions hint type (.txt, .jpg, .mp3).",
+      "Permissions control who can read/write/execute files."
+    ],
+    quiz: ensureValid([
+      q("Main job of an OS:",["Print documents","Manage hardware & apps","Host websites","Compile code"],"Manage hardware & apps"),
+      q("Which is NOT an OS?",["Linux","Windows","Photoshop","macOS"],"Photoshop"),
+      q("A folder is also called a…",["Volume","Directory","Sector","Block"],"Directory"),
+      q(".jpg is typically a…",["Image","Audio","Executable","Spreadsheet"],"Image"),
+      q("Run permission allows you to…",["View owners","Execute program/script","Mount drive","Encrypt file"],"Execute program/script"),
+      q("Linux path example:",["C:\\\\Users\\\\Me","/home/me","D:\\\\Docs","E:\\\\Temp"],"/home/me"),
+      q("Windows command to list files:",["ls","dir","list","show"],"dir"),
+      q("macOS is built on…",["DOS","BSD/Unix","Windows NT","AmigaOS"],"BSD/Unix")
+    ])
+  },
+  // 3
+  {
+    title:"Unit 3 — Networking & the Internet",
+    lesson:[
+      "Internet is a global network of networks using TCP/IP.",
+      "IP addresses identify devices; DNS maps names (like example.com) to IP addresses.",
+      "Routers connect networks; switches connect devices within a local network.",
+      "HTTP/HTTPS are web protocols; HTTPS encrypts traffic using TLS."
+    ],
+    quiz: ensureValid([
+      q("DNS is like the internet’s…",["Library","Phone book","Post office","Power grid"],"Phone book"),
+      q("The 'S' in HTTPS stands for…",["Static","Secure","Server","Shared"],"Secure"),
+      q("Device that connects networks:",["Switch","Router","Hub","Bridge"],"Router"),
+      q("IP address identifies…",["A file","A device","A user account","A cable"],"A device"),
+      q("Protocol for web pages:",["SMTP","FTP","HTTP","SSH"],"HTTP"),
+      q("Local area network device:",["Switch","Router-to-ISP","Satellite","Firewall only"],"Switch"),
+      q("DNS translates domain names to…",["MACs","Ports","IP addresses","Cables"],"IP addresses"),
+      q("Public Wi-Fi safety includes…",["Disable updates","Turn off sharing","Share passwords","Use WEP"],"Turn off sharing")
+    ])
+  },
+  // 4
+  {
+    title:"Unit 4 — Programming Basics (JavaScript)",
+    lesson:[
+      "Core constructs: variables, data types, expressions, conditionals, loops, functions.",
+      "Variables (let/const) store values; conditionals (if/else) make decisions; loops (for/while) repeat tasks.",
+      "Functions encapsulate reusable logic. Debug with console.log()."
+    ],
+    quiz: ensureValid([
+      q("Declare a variable in JS:",["var x = 1;","let x = 1;","const x = 1;","All of the above"],"All of the above"),
+      q("Strict equality operator:",["==","===","=","<>"],"==="),
+      q("A loop is used to…",["Encrypt files","Repeat tasks","Install apps","Format disks"],"Repeat tasks"),
+      q("Function keyword:",["func","def","function","method"],"function"),
+      q("console.log() prints to…",["Printer","Screen pixels","Browser console","Clipboard"],"Browser console"),
+      q("Which is NOT a JS primitive?",["Number","String","Boolean","Matrix"],"Matrix"),
+      q("Array literal:",["(1,2,3)","{1,2,3}","[1,2,3]","<1,2,3>"],"[1,2,3]"),
+      q("True/False type is called…",["Boolean","Integer","Byte","Symbol"],"Boolean")
+    ])
+  },
+  // 5
+  {
+    title:"Unit 5 — Algorithms & Complexity",
+    lesson:[
+      "Algorithms are step-by-step procedures; qualities: correctness, efficiency, clarity.",
+      "Big-O notation describes growth (O(1), O(log n), O(n), O(n^2), …).",
+      "Examples: linear search, binary search (requires sorted data), common sorts (bubble, merge, quick)."
+    ],
+    quiz: ensureValid([
+      q("Binary search requires…",["Random data","Sorted data","Hash table","Tree"],"Sorted data"),
+      q("Bubble sort repeatedly…",["Swaps adjacent out-of-order pairs","Picks a pivot","Merges halves","Counts keys"],"Swaps adjacent out-of-order pairs"),
+      q("Big-O describes…",["Program color","Runtime growth","RAM size","Disk type"],"Runtime growth"),
+      q("Which is fastest on huge data (usually)?",["Bubble sort","Selection sort","Merge/Quick sort","Gnome sort"],"Merge/Quick sort"),
+      q("Linear search is…",["O(1)","O(n)","O(log n)","O(n log n)"],"O(n)"),
+      q("Binary search is…",["O(1)","O(n)","O(log n)","O(n^2)"],"O(log n)"),
+      q("An algorithm must be…",["Ambiguous","Finite & well-defined","Random","Infinite"],"Finite & well-defined"),
+      q("Flowcharts help…",["Encrypt data","Visualize logic","Allocate RAM","Open ports"],"Visualize logic")
+    ])
+  },
+  // 6
+  {
+    title:"Unit 6 — Data Structures",
+    lesson:[
+      "Choose structures based on needed operations (insert/search/delete).",
+      "Arrays (indexed), linked lists (nodes), stacks (LIFO), queues (FIFO).",
+      "Maps/dictionaries store key→value; trees/graphs model hierarchical and network relationships."
+    ],
+    quiz: ensureValid([
+      q("Stack order is…",["FIFO","LIFO","Random","Sorted"],"LIFO"),
+      q("Queue order is…",["LIFO","FIFO","Random","Hashed"],"FIFO"),
+      q("Array access by index is typically…",["O(n)","O(n^2)","O(1)","O(log n)"],"O(1)"),
+      q("Remove top of a stack:",["enqueue","dequeue","pop","shift"],"pop"),
+      q("Map/dictionary stores…",["Only numbers","Key→value pairs","Only strings","Only arrays"],"Key→value pairs"),
+      q("Tree is best for…",["Flat list","Hierarchies","Sorting only","GPU tasks"],"Hierarchies"),
+      q("Queue example:",["Undo stack","Browser history","Print jobs","Call stack"],"Print jobs"),
+      q("Linked list nodes store…",["Only values","Value and next pointer","Only pointers","Only keys"],"Value and next pointer")
+    ])
+  },
+  // 7
+  {
+    title:"Unit 7 — Databases & SQL",
+    lesson:[
+      "Relational databases use tables (rows/columns) with schemas.",
+      "SQL operations: SELECT (read), INSERT, UPDATE, DELETE.",
+      "Primary keys uniquely identify rows; foreign keys link tables; WHERE filters results."
+    ],
+    quiz: ensureValid([
+      q("Which reads rows?",["INSERT","SELECT","UPDATE","DELETE"],"SELECT"),
+      q("Add a row is…",["INSERT","SELECT","PUT","MERGE"],"INSERT"),
+      q("Change existing rows:",["SELECT","UPDATE","DELETE","CREATE"],"UPDATE"),
+      q("Remove rows:",["DELETE","DROP","ERASE","UNLINK"],"DELETE"),
+      q("Primary key must be…",["Unique & not null","Encrypted","Sequential","Text"],"Unique & not null"),
+      q("Filter clause:",["GROUP BY","ORDER BY","WHERE","HAVING ONLY"],"WHERE"),
+      q("Relational data is stored in…",["Folders","Graphs","Tables","Buckets"],"Tables"),
+      q("Linking tables uses…",["Foreign keys","DNS","Ports","Threads"],"Foreign keys")
+    ])
+  },
+  // 8
+  {
+    title:"Unit 8 — Web Development (HTML/CSS/JS)",
+    lesson:[
+      "HTML structures content; CSS styles; JavaScript adds behavior.",
+      "Common tags: <h1>, <p>, <a>, <img>, <ul>/<li>, <div>/<span>.",
+      "CSS selectors target elements; Flexbox/Grid handle layout; JS manipulates the DOM and handles events."
+    ],
+    quiz: ensureValid([
+      q("Create a link:",["<link>","<a>","<img>","<href>"],"<a>"),
+      q("Image source attribute:",["href","src","alt","ref"],"src"),
+      q("CSS select all paragraphs:",["#p","p",".p","*p"],"p"),
+      q("Layout system for alignment:",["Flexbox","PNG","SMTP","DNS"],"Flexbox"),
+      q("JS changes a page by editing the…",["CPU","BIOS","DOM","ISP"],"DOM"),
+      q("Style files are usually…",[".js",".css",".sql",".json"],".css"),
+      q("Add click handlers with…",["CSS","HTML only","JavaScript","DNS"],"JavaScript"),
+      q("Semantic tag for navigation:",["<div>","<nav>","<span>","<section>"],"<nav>")
+    ])
+  },
+  // 9
+  {
+    title:"Unit 9 — Cybersecurity & Best Practices",
+    lesson:[
+      "Use long unique passwords and a password manager; enable MFA.",
+      "Beware phishing and malicious links/attachments; verify senders.",
+      "Keep software updated; maintain backups to mitigate ransomware."
+    ],
+    quiz: ensureValid([
+      q("Best password practice:",["Reuse strong one","Password manager + unique","Sticky note","'password123'"],"Password manager + unique"),
+      q("MFA stands for…",["Multi-Factor Authentication","Many Folder Access","Main File Account","Multiple Firewall Agreement"],"Multi-Factor Authentication"),
+      q("Phishing tries to…",["Improve Wi-Fi","Trick you into giving info","Speed up CPU","Compress files"],"Trick you into giving info"),
+      q("Ransomware…",["Encrypts files for payment","Blocks ads","Cleans registry","Installs drivers"],"Encrypts files for payment"),
+      q("Safer on public Wi-Fi:",["Turn off sharing","Email passwords","Install random apps","Disable updates"],"Turn off sharing"),
+      q("Keep systems safe by…",["Never updating","Random downloads","Regular updates","Disabling antivirus"],"Regular updates"),
+      q("Strong passwords are…",["Short & simple","Long & unique","All lowercase","Same everywhere"],"Long & unique"),
+      q("Backups help recover from…",["Ransomware","Screen burn-in","Dead pixels","Overclocking"],"Ransomware")
+    ])
+  },
+  // 10 — Final (quiz will be filled from pool below)
+  {
+    title:"Unit 10 — Final Exam (60 Questions)",
+    lesson:[
+      "This comprehensive exam covers Units 1–9. You must score at least 67% to pass.",
+      "Review hardware/software, OS & files, networking, JS basics, algorithms, data structures, databases, web development, and cybersecurity."
+    ],
+    quiz:[]
+  }
+];
+
+// Build the 60-question final from earlier units
+const pool = units.slice(0,9).flatMap(u => u.quiz);
+while(pool.length < 60) pool.push(...units.slice(0,9).flatMap(u=>u.quiz));
+units[9].quiz = ensureValid(shuffle(pool)).slice(0,60);
+
+/* ====== STATE ====== */
+let auth = { username:null, password:null };
+let progress = {}; // e.g., { "Unit 1 — …": true }
+
+/* ====== UI RENDER ====== */
+function renderUnits(){
+  const grid = $("#unitGrid");
+  grid.innerHTML = "";
+  units.forEach((u,i)=>{
+    const prevDone = (i===0) ? true : !!progress[units[i-1].title];
+    const unlocked = (i===0) ? true : prevDone || !!progress[u.title];
+    const done = !!progress[u.title];
+
+    const card = document.createElement("div");
+    card.className = "card unitCard";
+    card.innerHTML = `
+      <h3>${u.title}</h3>
+      <div class="progress" aria-label="unit progress"><div style="width:${done?100:0}%"></div></div>
+      <p class="muted" style="margin:.3rem 0">${done?"Completed":"Not completed"}</p>
+      <div class="assignments">
+        <button class="btn ${done?'passed':''}" ${!unlocked?'disabled':''}>${done ? "✔ Review Lesson" : "Open Lesson"}</button>
+      </div>
+    `;
+    card.querySelector("button").onclick = ()=> openLesson(u);
+    grid.appendChild(card);
+  });
+}
+
+function openLesson(unit){
+  const dlg = document.createElement("div");
+  dlg.className = "card lesson";
+  dlg.style.marginBottom = "1rem";
+  dlg.innerHTML = `
+    <h3>${unit.title} — Lesson</h3>
+    ${(unit.lesson||[]).map(p=>`<p>${p}</p>`).join("")}
+    <div class="row" style="margin-top:.75rem">
+      <button class="btn" id="startQuiz">Start Quiz</button>
+      <button class="btn ghost" id="closeLesson">Close</button>
+    </div>
+  `;
+  $(".wrap").insertBefore(dlg, $("#courseSection"));
+  dlg.querySelector("#closeLesson").onclick = ()=> dlg.remove();
+  dlg.querySelector("#startQuiz").onclick = ()=>{ dlg.remove(); startQuiz(unit); };
+  dlg.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function startQuiz(unit){
+  const quiz = ensureValid(unit.quiz);
+  const dlg = document.createElement("div");
+  dlg.className="card";
+  dlg.innerHTML = `
+    <h3>${unit.title} — Quiz</h3>
+    <p class="muted">Score ${Math.round(PASS_THRESHOLD*100)}% or higher to pass.</p>
+    <div id="qbox"></div>
+    <div class="row" style="margin-top:.75rem">
+      <button class="btn" id="submitQuiz">Submit</button>
+      <button class="btn ghost" id="cancelQuiz">Cancel</button>
+    </div>
+  `;
+  $(".wrap").insertBefore(dlg, $("#courseSection"));
+
+  const qbox = dlg.querySelector("#qbox");
+  if(quiz.length===0){
+    qbox.innerHTML = "<p class='muted'>No questions found.</p>";
+  }else{
+    quiz.forEach((item,idx)=>{
+      const block = document.createElement("div");
+      block.className = "quiz-item";
+      block.innerHTML = `
+        <p><strong>${idx+1}.</strong> ${item.q}</p>
+        ${item.options.map(opt=>`
+          <label style="display:block;margin:.2rem 0">
+            <input type="radio" name="q${idx}" value="${opt}"/> ${opt}
+          </label>
+        `).join("")}
+      `;
+      qbox.appendChild(block);
+    });
+  }
+
+  dlg.querySelector("#cancelQuiz").onclick = ()=> dlg.remove();
+  dlg.querySelector("#submitQuiz").onclick = async ()=>{
+    if(!auth.username){ banner(false,"Please login first."); return; }
+    let correct=0,total=quiz.length;
+    quiz.forEach((item,idx)=>{
+      const picked = dlg.querySelector(`input[name="q${idx}"]:checked`);
+      if(picked && picked.value===item.answer) correct++;
+    });
+    const pct = Math.round((correct/Math.max(1,total))*100);
+    const passed = (correct/Math.max(1,total)) >= PASS_THRESHOLD;
+
+    if(passed){
+      progress[unit.title] = true;
+      try{
+        const resp = await apiSave(auth.username, progress);
+        if(!resp || resp.success!==true){
+          console.warn("saveProgress fallback to localStorage", resp);
+          localStorage.setItem("progress:"+auth.username, JSON.stringify(progress));
+        }
+      }catch(e){
+        console.error("saveProgress error", e);
+        localStorage.setItem("progress:"+auth.username, JSON.stringify(progress));
+      }
+      alert(`✅ Passed with ${pct}%.`);
+      dlg.remove();
+      renderUnits();
+    }else{
+      alert(`❌ You scored ${pct}%. Need at least ${Math.round(PASS_THRESHOLD*100)}%. Review the lesson and try again.`);
+    }
+  };
+}
+
+/* ====== AUTH FLOW ====== */
+function isLoggedIn(){ return !!auth.username; }
+function onLoginSuccess(serverProgress){
+  let p = serverProgress;
+  if(typeof p==="string"){ p = safeJSON(p) || {}; }
+  progress = p || {};
+  const dn = $("#displayName").value.trim();
+  if(dn) localStorage.setItem("display_name", dn);
+  $("#greeter").textContent = "Hello" + (localStorage.getItem("display_name")? ", "+localStorage.getItem("display_name"):"") + "!";
+  hide($("#welcomeSection"));
+  show($("#courseSection"));
+  renderUnits();
+}
+
+async function doLogin(){
+  $("#alertError").style.display="none"; $("#alertOk").style.display="none";
+  const u = $("#authUser").value.trim();
+  const p = $("#authPass").value;
+  if(!u || !p){ banner(false,"Enter username and password."); return; }
+  try{
+    const resp = await apiLogin(u,p);
+    if(resp && resp.success){
+      auth = { username:u, password:p };
+      const serverProgress = (resp.progress!==undefined) ? resp.progress : (resp.data && resp.data.progress);
+      const local = localStorage.getItem("progress:"+u);
+      const merged = Object.assign({}, safeJSON(serverProgress||"{}")||{}, safeJSON(local)||{});
+      onLoginSuccess(merged);
+      banner(true,"Logged in.");
+    }else{
+      banner(false, resp && resp.message ? resp.message : "Login failed.");
+    }
+  }catch(e){
+    console.error(e);
+    banner(false,"Could not connect to the server. Check deployment & permissions.");
+  }
+}
+
+async function doSignup(){
+  $("#alertError").style.display="none"; $("#alertOk").style.display="none";
+  const u = $("#authUser").value.trim();
+  const p = $("#authPass").value;
+  if(!u || !p){ banner(false,"Enter username and password."); return; }
+  try{
+    const resp = await apiSignup(u,p);
+    if(resp && resp.success){
+      banner(true,"Account created! You can now log in.");
+    }else{
+      banner(false, resp && resp.message ? resp.message : "Signup failed.");
+    }
+  }catch(e){
+    console.error(e);
+    banner(false,"Could not connect to the server. Check deployment & permissions.");
+  }
+}
+
+$("#btnLogin").onclick = doLogin;
+$("#btnSignup").onclick = doSignup;
+$("#btnViewUnits").onclick = ()=>{
+  if(!isLoggedIn()){ banner(false,"Please log in first to view units."); return; }
+  hide($("#welcomeSection"));
+  show($("#courseSection"));
+  renderUnits();
+};
+$("#btnLogout").onclick = ()=>{
+  auth = { username:null, password:null };
+  progress = {};
+  show($("#welcomeSection"));
+  hide($("#courseSection"));
+  $("#alertError").style.display="none"; $("#alertOk").style.display="none";
+};
+
+/* ====== INIT ====== */
+(function init(){
+  setTheme(localStorage.getItem("theme_pref") || "auto");
+  const dn = localStorage.getItem("display_name");
+  if(dn) $("#displayName").value = dn;
+})();
+</script>
+</body>
+</html>
